@@ -8,6 +8,10 @@
       "destination": "https://youtube-production-ee12.up.railway.app/api/:path*"
     },
     {
+      "source": "/audio/:path*",
+      "destination": "https://youtube-production-ee12.up.railway.app/audio/:path*"
+    },
+    {
       "source": "/((?!assets|icons|favicon|apple-touch-icon|manifest|browserconfig).*)",
       "destination": "/index.html"
     }
