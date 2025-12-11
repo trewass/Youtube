@@ -150,13 +150,19 @@ export default function AudiobooksPage() {
           {audiobooks.map((audiobook) => (
             <div key={audiobook.id} className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
               <div className="p-3 flex gap-3">
-                {audiobook.thumbnail_url && (
-                  <img
-                    src={audiobook.thumbnail_url}
-                    alt={audiobook.title}
-                    className="w-20 h-20 sm:w-28 sm:h-20 rounded object-cover flex-shrink-0"
-                  />
-                )}
+                <div className="w-20 h-20 sm:w-28 sm:h-20 rounded flex-shrink-0 overflow-hidden bg-gray-700">
+                  {audiobook.thumbnail_url ? (
+                    <img
+                      src={audiobook.thumbnail_url}
+                      alt={audiobook.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">
+                      📚
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex-1 min-w-0 flex flex-col justify-between">
                   <div>

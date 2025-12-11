@@ -6,6 +6,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://youtube-production-ee12.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/((?!assets|icons|favicon|apple-touch-icon|manifest|browserconfig).*)",
+      "destination": "/index.html"
     }
   ]
 }
