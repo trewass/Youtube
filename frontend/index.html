@@ -54,43 +54,7 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx?v=2.0"></script>
-    
-    <!-- Service Worker Cleanup and Force Reload -->
-    <script>
-      // AGGRESSIVE Service Worker cleanup
-      (async function() {
-        if ('serviceWorker' in navigator) {
-          // Get all registrations
-          const registrations = await navigator.serviceWorker.getRegistrations();
-          
-          // Unregister all
-          for (const registration of registrations) {
-            await registration.unregister();
-            console.log('✅ Unregistered SW:', registration.scope);
-          }
-          
-          // Clear all caches
-          if ('caches' in window) {
-            const cacheNames = await caches.keys();
-            for (const cacheName of cacheNames) {
-              await caches.delete(cacheName);
-              console.log('✅ Deleted cache:', cacheName);
-            }
-          }
-          
-          // Force reload if this is the first cleanup
-          const cleanupDone = sessionStorage.getItem('sw-cleanup-done');
-          if (!cleanupDone) {
-            sessionStorage.setItem('sw-cleanup-done', 'true');
-            console.log('🔄 Force reloading to apply changes...');
-            setTimeout(() => {
-              window.location.reload(true);
-            }, 100);
-          }
-        }
-      })();
-    </script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
 

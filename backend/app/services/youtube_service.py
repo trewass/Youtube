@@ -139,7 +139,6 @@ class YouTubeService:
             'outtmpl': output_path,
             'quiet': False,
             'no_warnings': False,
-            'ffmpeg_location': '/opt/homebrew/bin',  # Путь к ffmpeg для macOS Homebrew
         }
         
         if progress_callback:
