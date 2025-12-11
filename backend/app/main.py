@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 
-from app.api import channels, playlists, audiobooks, notes, ai_chat
+from app.api import channels, playlists, audiobooks, notes, ai_chat, stream
 from app.core.config import settings
 from app.core.database import engine
 from app.models import Base
@@ -36,6 +36,7 @@ app.include_router(playlists.router, prefix="/api/playlists", tags=["Playlists"]
 app.include_router(audiobooks.router, prefix="/api/audiobooks", tags=["Audiobooks"])
 app.include_router(notes.router, prefix="/api/notes", tags=["Notes"])
 app.include_router(ai_chat.router, prefix="/api/ai", tags=["AI"])
+app.include_router(stream.router, prefix="/api", tags=["Stream"])
 
 @app.get("/")
 async def root():
