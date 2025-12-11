@@ -131,22 +131,22 @@ export default function AudiobooksPage() {
         <div className="space-y-4">
           {audiobooks.map((audiobook) => (
             <div key={audiobook.id} className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
-              <div className="p-4 flex gap-4">
+              <div className="p-3 sm:p-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 {audiobook.thumbnail_url && (
                   <img
                     src={audiobook.thumbnail_url}
                     alt={audiobook.title}
-                    className="w-32 h-20 rounded object-cover flex-shrink-0"
+                    className="w-full sm:w-32 h-40 sm:h-20 rounded object-cover flex-shrink-0"
                   />
                 )}
                 
                 <div className="flex-1 space-y-2 min-w-0">
-                  <h3 className="font-semibold text-lg">{audiobook.title}</h3>
+                  <h3 className="font-semibold text-base sm:text-lg line-clamp-2">{audiobook.title}</h3>
                   
                   {audiobook.ai_summary && (
                     <button
                       onClick={() => toggleDescription(audiobook.id)}
-                      className="flex items-center gap-2 text-sm text-primary-400 hover:text-primary-300 transition-colors"
+                      className="flex items-center gap-2 text-xs sm:text-sm text-primary-400 hover:text-primary-300 transition-colors"
                     >
                       {expandedDescriptions.has(audiobook.id) ? (
                         <>
@@ -162,13 +162,13 @@ export default function AudiobooksPage() {
                     </button>
                   )}
                   
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400">
                     {audiobook.duration && (
                       <span>{formatDuration(audiobook.duration)}</span>
                     )}
                     {audiobook.is_downloaded && (
                       <span className="text-green-500 flex items-center gap-1">
-                        <CheckCircle size={16} />
+                        <CheckCircle size={14} />
                         Скачано
                       </span>
                     )}
@@ -180,11 +180,11 @@ export default function AudiobooksPage() {
                   </div>
                 </div>
                 
-                <div className="flex flex-col gap-2 flex-shrink-0">
+                <div className="flex sm:flex-col gap-2 flex-shrink-0">
                   {audiobook.is_downloaded ? (
                     <button
                       onClick={() => navigate(`/audiobook/${audiobook.id}`)}
-                      className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                      className="flex-1 sm:flex-initial bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white px-4 py-2.5 sm:py-2 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap text-sm sm:text-base font-medium"
                     >
                       <Play size={18} />
                       Открыть
@@ -193,7 +193,7 @@ export default function AudiobooksPage() {
                     <button
                       onClick={() => handleDownload(audiobook.id)}
                       disabled={downloading === audiobook.id}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2 whitespace-nowrap"
+                      className="flex-1 sm:flex-initial bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 py-2.5 sm:py-2 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap text-sm sm:text-base font-medium"
                     >
                       <Download size={18} />
                       {downloading === audiobook.id ? 'Скачивание...' : 'Скачать'}
@@ -204,9 +204,9 @@ export default function AudiobooksPage() {
               
               {/* Collapsible description */}
               {audiobook.ai_summary && expandedDescriptions.has(audiobook.id) && (
-                <div className="px-4 pb-4 pt-0">
-                  <div className="bg-gray-900/50 rounded-lg p-4 border-l-4 border-primary-500">
-                    <p className="text-sm text-gray-300 leading-relaxed">
+                <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-0">
+                  <div className="bg-gray-900/50 rounded-lg p-3 sm:p-4 border-l-4 border-primary-500">
+                    <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
                       {audiobook.ai_summary}
                     </p>
                   </div>

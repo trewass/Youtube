@@ -143,31 +143,31 @@ export default function AudiobookDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <button
           onClick={() => navigate(`/audiobooks/${audiobook.playlist_id}`)}
-          className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-800 active:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
         </button>
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold">{audiobook.title}</h2>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg sm:text-2xl font-bold line-clamp-2">{audiobook.title}</h2>
           {audiobook.ai_summary && (
-            <p className="text-gray-400 mt-1">{audiobook.ai_summary}</p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1 line-clamp-2">{audiobook.ai_summary}</p>
           )}
         </div>
       </div>
 
       {/* Audio Player */}
       {audiobook.audio_file_path && (
-        <div className="bg-gray-800 rounded-lg p-6">
+        <div className="bg-gray-800 rounded-lg p-3 sm:p-6">
           <audio
             ref={audioRef}
             controls
             className="w-full"
-            src={`http://localhost:8000${audiobook.audio_file_path}`}
+            src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${audiobook.audio_file_path}`}
           >
             Ваш браузер не поддерживает аудио элемент.
           </audio>
@@ -175,38 +175,38 @@ export default function AudiobookDetailPage() {
       )}
 
       {/* Notes Section */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Notes List */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold">Заметки</h3>
+            <h3 className="text-lg sm:text-xl font-semibold">Заметки</h3>
             <button
               onClick={() => setShowAddNote(!showAddNote)}
-              className="bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-lg transition-colors"
+              className="bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white p-2 rounded-lg transition-colors"
             >
-              <Plus size={20} />
+              <Plus size={18} className="sm:w-5 sm:h-5" />
             </button>
           </div>
 
           {showAddNote && (
-            <form onSubmit={handleAddNote} className="bg-gray-800 rounded-lg p-4 space-y-3">
+            <form onSubmit={handleAddNote} className="bg-gray-800 rounded-lg p-3 sm:p-4 space-y-2 sm:space-y-3">
               <input
                 type="text"
                 value={newNote.quote}
                 onChange={(e) => setNewNote({ ...newNote, quote: e.target.value })}
                 placeholder="Цитата (опционально)"
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full bg-gray-700 text-white px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <textarea
                 value={newNote.content}
                 onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
                 placeholder="Ваша заметка..."
                 rows={3}
-                className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full bg-gray-700 text-white px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
               <button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition-colors"
+                className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white py-2.5 sm:py-2 rounded-lg transition-colors text-sm sm:text-base font-medium"
               >
                 Добавить заметку
               </button>
@@ -214,24 +214,24 @@ export default function AudiobookDetailPage() {
           )}
 
           {notes.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">Заметок пока нет</p>
+            <p className="text-sm sm:text-base text-gray-400 text-center py-6 sm:py-8">Заметок пока нет</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {notes.map((note) => (
                 <div
                   key={note.id}
-                  className={`bg-gray-800 rounded-lg p-4 space-y-2 cursor-pointer hover:ring-2 hover:ring-primary-500 transition-all ${
+                  className={`bg-gray-800 rounded-lg p-3 sm:p-4 space-y-2 cursor-pointer hover:ring-2 hover:ring-primary-500 active:bg-gray-750 transition-all ${
                     chatNote?.id === note.id ? 'ring-2 ring-primary-500' : ''
                   }`}
                   onClick={() => handleStartChat(note)}
                 >
                   {note.quote && (
-                    <blockquote className="text-sm text-gray-300 italic border-l-2 border-primary-500 pl-3">
+                    <blockquote className="text-xs sm:text-sm text-gray-300 italic border-l-2 border-primary-500 pl-2 sm:pl-3">
                       "{note.quote}"
                     </blockquote>
                   )}
-                  <p className="text-gray-100">{note.content}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <p className="text-sm sm:text-base text-gray-100">{note.content}</p>
+                  <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-500">
                     {note.timestamp && (
                       <span>{formatTimestamp(note.timestamp)}</span>
                     )}
@@ -241,18 +241,18 @@ export default function AudiobookDetailPage() {
                           e.stopPropagation()
                           handleStartChat(note)
                         }}
-                        className="text-primary-400 hover:text-primary-300"
+                        className="text-primary-400 hover:text-primary-300 active:text-primary-200 p-1"
                       >
-                        <MessageSquare size={16} />
+                        <MessageSquare size={14} className="sm:w-4 sm:h-4" />
                       </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           handleDeleteNote(note.id)
                         }}
-                        className="text-red-400 hover:text-red-300"
+                        className="text-red-400 hover:text-red-300 active:text-red-200 p-1"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} className="sm:w-4 sm:h-4" />
                       </button>
                     </div>
                   </div>
@@ -263,31 +263,31 @@ export default function AudiobookDetailPage() {
         </div>
 
         {/* AI Chat */}
-        <div className="bg-gray-800 rounded-lg p-4 flex flex-col h-[600px]">
-          <h3 className="text-xl font-semibold mb-4">AI Обсуждение</h3>
+        <div className="bg-gray-800 rounded-lg p-3 sm:p-4 flex flex-col h-[400px] sm:h-[500px] lg:h-[600px]">
+          <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">AI Обсуждение</h3>
           
           {!chatNote ? (
             <div className="flex-1 flex items-center justify-center text-gray-400">
-              <p>Выберите заметку для обсуждения</p>
+              <p className="text-sm sm:text-base text-center px-4">Выберите заметку для обсуждения</p>
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+              <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-3 mb-3 sm:mb-4">
                 {chatHistory.map((msg, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded-lg ${
+                    className={`p-2.5 sm:p-3 rounded-lg ${
                       msg.role === 'user'
-                        ? 'bg-primary-600 ml-8'
-                        : 'bg-gray-700 mr-8'
+                        ? 'bg-primary-600 ml-6 sm:ml-8'
+                        : 'bg-gray-700 mr-6 sm:mr-8'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-xs sm:text-sm whitespace-pre-wrap">{msg.content}</p>
                   </div>
                 ))}
                 {chatLoading && (
-                  <div className="bg-gray-700 p-3 rounded-lg mr-8">
-                    <p className="text-sm text-gray-400">AI печатает...</p>
+                  <div className="bg-gray-700 p-2.5 sm:p-3 rounded-lg mr-6 sm:mr-8">
+                    <p className="text-xs sm:text-sm text-gray-400">AI печатает...</p>
                   </div>
                 )}
               </div>
@@ -299,14 +299,14 @@ export default function AudiobookDetailPage() {
                   onChange={(e) => setChatMessage(e.target.value)}
                   placeholder="Задайте вопрос..."
                   disabled={chatLoading}
-                  className="flex-1 bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+                  className="flex-1 bg-gray-700 text-white px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
                 />
                 <button
                   type="submit"
                   disabled={chatLoading}
-                  className="bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-lg transition-colors disabled:opacity-50"
+                  className="bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white p-2 rounded-lg transition-colors disabled:opacity-50"
                 >
-                  <Send size={20} />
+                  <Send size={18} className="sm:w-5 sm:h-5" />
                 </button>
               </form>
             </>
