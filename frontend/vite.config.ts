@@ -5,13 +5,14 @@ export default defineConfig({
   plugins: [
     react(),
   ],
+  base: '/',
   build: {
     // Оптимизация для production
     sourcemap: false,
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Удаляем console.log в production
+        drop_console: false, // Оставляем console.log для отладки
         drop_debugger: true
       }
     },
