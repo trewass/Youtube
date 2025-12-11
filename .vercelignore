@@ -1,0 +1,10 @@
+backend/
+storage/
+*.db
+*.db-journal
+__pycache__/
+*.pyc
+venv/
+node_modules/
+.env
+.env.local
