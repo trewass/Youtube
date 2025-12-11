@@ -78,6 +78,9 @@ export default function PlaylistsPage() {
         <div className="min-w-0">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold line-clamp-1">{channel?.title}</h2>
           <p className="text-sm sm:text-base text-gray-400">Плейлисты канала</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            Нажмите "Синхронизировать" для загрузки списка видео
+          </p>
         </div>
       </div>
 

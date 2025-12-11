@@ -56,20 +56,33 @@ export default function AudiobooksPage() {
   const handleDownload = async (audiobookId: number) => {
     try {
       setDownloading(audiobookId)
-      await audiobooksApi.downloadAudiobook(audiobookId)
-      alert('Скачивание начато! Это может занять некоторое время.')
+      console.log('🔽 Starting download for audiobook:', audiobookId)
+      
+      const response = await audiobooksApi.downloadAudiobook(audiobookId)
+      console.log('✅ Download API response:', response.data)
+      
+      alert('Скачивание начато! Это может занять несколько минут. Следите за прогрессом.')
       
       // Poll for status update
       const interval = setInterval(async () => {
         try {
-          const response = await audiobooksApi.getAudiobook(audiobookId)
-          const updated = response.data
+          const statusResponse = await audiobooksApi.getAudiobook(audiobookId)
+          const updated = statusResponse.data
+          
+          console.log('📊 Download progress:', {
+            id: updated.id,
+            progress: updated.download_progress,
+            is_downloaded: updated.is_downloaded,
+            is_converted: updated.is_converted
+          })
           
           setAudiobooks(prev => 
             prev.map(ab => ab.id === audiobookId ? updated : ab)
           )
           
           if (updated.is_downloaded && updated.is_converted) {
+            console.log('✅ Download completed!')
+            alert('Аудиокнига успешно скачана!')
             clearInterval(interval)
             setDownloading(null)
           }
@@ -80,13 +93,15 @@ export default function AudiobooksPage() {
       
       // Clear interval after 5 minutes
       setTimeout(() => {
+        console.log('⏰ Download timeout reached')
         clearInterval(interval)
         setDownloading(null)
       }, 300000)
       
-    } catch (error) {
-      console.error('Error downloading audiobook:', error)
-      alert('Ошибка скачивания')
+    } catch (error: any) {
+      console.error('❌ Error downloading audiobook:', error)
+      const errorMessage = error.response?.data?.detail || error.message || 'Неизвестная ошибка'
+      alert(`Ошибка скачивания: ${errorMessage}\n\nПроверьте консоль для деталей (F12)`)
       setDownloading(null)
     }
   }
@@ -99,20 +114,23 @@ export default function AudiobooksPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <button
           onClick={() => navigate(`/playlists/${playlist?.channel_id}`)}
-          className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-800 active:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
         </button>
-        <div>
-          <h2 className="text-3xl font-bold">{playlist?.title}</h2>
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold line-clamp-2">{playlist?.title}</h2>
           {playlist?.author && (
-            <p className="text-primary-400">Автор: {playlist.author}</p>
+            <p className="text-sm sm:text-base text-primary-400">Автор: {playlist.author}</p>
           )}
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            Нажмите "Скачать" для загрузки аудио с YouTube
+          </p>
         </div>
       </div>
 

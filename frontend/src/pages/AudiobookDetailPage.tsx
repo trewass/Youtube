@@ -157,6 +157,11 @@ export default function AudiobookDetailPage() {
           {audiobook.ai_summary && (
             <p className="text-xs sm:text-sm text-gray-400 mt-1 line-clamp-2">{audiobook.ai_summary}</p>
           )}
+          {!audiobook.ai_summary && (
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+              Слушайте аудио, делайте заметки и обсуждайте с AI
+            </p>
+          )}
         </div>
       </div>
 

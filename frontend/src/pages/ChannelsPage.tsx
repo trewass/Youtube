@@ -60,7 +60,12 @@ export default function ChannelsPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <h2 className="text-2xl sm:text-3xl font-bold">YouTube Каналы</h2>
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-bold">YouTube Каналы</h2>
+        <p className="text-xs sm:text-sm text-gray-400 mt-2">
+          Добавьте каналы с аудиокнигами из YouTube для создания своей библиотеки
+        </p>
+      </div>
 
       {/* Add channel form */}
       <form onSubmit={handleAddChannel} className="bg-gray-800 rounded-lg p-4 sm:p-6 space-y-3 sm:space-y-4">

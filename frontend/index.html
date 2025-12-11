@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     
+    <!-- Prevent caching during development -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
@@ -49,22 +54,42 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx?v=2.0"></script>
     
-    <!-- Service Worker Registration - TEMPORARILY DISABLED -->
+    <!-- Service Worker Cleanup and Force Reload -->
     <script>
-      // Service Worker временно отключен для диагностики
-      console.log('Service Worker disabled for debugging');
-      
-      // Unregister existing service workers
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          registrations.forEach((registration) => {
-            registration.unregister();
-            console.log('Unregistered SW:', registration.scope);
-          });
-        });
-      }
+      // AGGRESSIVE Service Worker cleanup
+      (async function() {
+        if ('serviceWorker' in navigator) {
+          // Get all registrations
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          
+          // Unregister all
+          for (const registration of registrations) {
+            await registration.unregister();
+            console.log('✅ Unregistered SW:', registration.scope);
+          }
+          
+          // Clear all caches
+          if ('caches' in window) {
+            const cacheNames = await caches.keys();
+            for (const cacheName of cacheNames) {
+              await caches.delete(cacheName);
+              console.log('✅ Deleted cache:', cacheName);
+            }
+          }
+          
+          // Force reload if this is the first cleanup
+          const cleanupDone = sessionStorage.getItem('sw-cleanup-done');
+          if (!cleanupDone) {
+            sessionStorage.setItem('sw-cleanup-done', 'true');
+            console.log('🔄 Force reloading to apply changes...');
+            setTimeout(() => {
+              window.location.reload(true);
+            }, 100);
+          }
+        }
+      })();
     </script>
   </body>
 </html>
