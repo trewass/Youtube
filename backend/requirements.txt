@@ -1,0 +1,31 @@
+# Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-multipart>=0.0.9
+
+# Database
+sqlalchemy>=2.0.35
+alembic>=1.13.3
+
+# YouTube & Media
+yt-dlp>=2024.12.6
+mutagen>=1.47.0
+
+# AI
+openai>=1.54.0
+
+# Utilities
+python-dotenv>=1.0.1
+pydantic>=2.10.0
+pydantic-settings>=2.6.0
+httpx>=0.28.0
+aiofiles>=24.1.0
+requests>=2.32.0
+
+# Background tasks
+celery>=5.4.0
+redis>=5.2.0
+
+# Auth (optional)
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
