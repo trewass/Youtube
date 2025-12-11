@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Youtube, BookOpen, MessageSquare, Download } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 export default function HomePage() {
   return (

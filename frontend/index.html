@@ -2,16 +2,107 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Библиотека аудиокниг с YouTube" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    
+    <!-- Viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Офлайн библиотека аудиокниг с заметками и AI обсуждениями" />
     <meta name="theme-color" content="#1f2937" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="AudioBooks" />
+    
+    <!-- iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="AudioBooks" />
+    
+    <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>AudioBook Library</title>
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png" />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#1f2937" />
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="AudioBook Library" />
+    <meta property="og:description" content="Офлайн библиотека аудиокниг с заметками и AI обсуждениями" />
+    <meta property="og:image" content="/icons/icon-512x512.png" />
+    
+    <!-- Preconnect для быстрой загрузки -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <title>AudioBook Library - Библиотека Аудиокниг</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      // Регистрация Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('/sw.js')
+            .then((registration) => {
+              console.log('✅ SW registered:', registration.scope);
+              
+              // Проверка обновлений каждые 60 секунд
+              setInterval(() => {
+                registration.update();
+              }, 60000);
+            })
+            .catch((error) => {
+              console.log('❌ SW registration failed:', error);
+            });
+        });
+        
+        // Обработка обновлений SW
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+      }
+      
+      // Определение установки PWA
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('💡 PWA can be installed');
+        
+        // Можно показать кнопку "Установить приложение"
+        // showInstallButton();
+      });
+      
+      // После установки
+      window.addEventListener('appinstalled', () => {
+        console.log('🎉 PWA installed!');
+        deferredPrompt = null;
+      });
+      
+      // iOS standalone mode detection
+      if (window.navigator.standalone) {
+        console.log('📱 Running in iOS standalone mode');
+      }
+    </script>
   </body>
 </html>
 
