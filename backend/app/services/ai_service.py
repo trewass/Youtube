@@ -175,6 +175,11 @@ class AIService:
             print(f"Error generating summary: {e}")
             return None
 
+    def discuss_quote(self, quote: str, context: str = "", history: Optional[List[Dict]] = None) -> Optional[str]:
+        """Обсуждение цитаты с AI"""
+        if not self.api_key or not self.client:
+            return None
+        
         # Формируем промпт
         prompt = ""
         if not history:

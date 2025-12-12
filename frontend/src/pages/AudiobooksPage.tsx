@@ -186,7 +186,7 @@ export default function AudiobooksPage() {
                     </div>
                   </div>
 
-                  {audiobook.ai_summary && (
+                  {(audiobook.ai_summary || audiobook.description) && (
                     <button
                       onClick={() => toggleDescription(audiobook.id)}
                       className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary-300 transition-colors mt-1 self-start"
@@ -229,11 +229,11 @@ export default function AudiobooksPage() {
               </div>
 
               {/* Collapsible description */}
-              {audiobook.ai_summary && expandedDescriptions.has(audiobook.id) && (
+              {(audiobook.ai_summary || audiobook.description) && expandedDescriptions.has(audiobook.id) && (
                 <div className="px-3 pb-3 pt-0">
                   <div className="bg-gray-900/50 rounded-lg p-3 border-l-4 border-primary-500">
                     <p className="text-xs text-gray-300 leading-relaxed">
-                      {audiobook.ai_summary}
+                      {audiobook.ai_summary || audiobook.description}
                     </p>
                   </div>
                 </div>

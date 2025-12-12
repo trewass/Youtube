@@ -88,11 +88,16 @@ export default function AudiobookDetailPage() {
 
   const handleStartChat = async (note: Note) => {
     setChatNote(note)
+    setChatMessage('') // Очищаем поле ввода при переключении заметки
 
     if (note.ai_discussion) {
       try {
         const response = await aiApi.getDiscussionHistory(note.id)
-        setChatHistory(response.data.history)
+        if (response.data.history && Array.isArray(response.data.history)) {
+          setChatHistory(response.data.history)
+        } else {
+          setChatHistory([])
+        }
       } catch (error) {
         console.error('Error loading chat history:', error)
         setChatHistory([])
@@ -110,18 +115,21 @@ export default function AudiobookDetailPage() {
     try {
       setChatLoading(true)
 
+      // Если это первое сообщение и нет истории, отправляем цитату с вопросом
+      // Если есть история, отправляем только новый вопрос
       const response = await aiApi.discussQuote({
         quote: chatNote.quote || chatNote.content,
-        context: chatMessage,
+        context: chatMessage.trim(),
         note_id: chatNote.id,
         history: chatHistory.length > 0 ? chatHistory : undefined,
       })
 
       setChatHistory(response.data.history)
       setChatMessage('')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error)
-      alert('Ошибка отправки сообщения')
+      const errorMessage = error.response?.data?.detail || error.message || 'Неизвестная ошибка'
+      alert(`Ошибка отправки сообщения: ${errorMessage}`)
     } finally {
       setChatLoading(false)
     }
