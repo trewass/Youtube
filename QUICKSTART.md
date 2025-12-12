@@ -206,3 +206,4 @@ cd frontend && npm update
 3. Проверьте `.env` файлы
 4. Откройте issue на GitHub
 
+

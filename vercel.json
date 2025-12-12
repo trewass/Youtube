@@ -10,10 +10,25 @@
     {
       "source": "/audio/:path*",
       "destination": "https://youtube-production-ee12.up.railway.app/audio/:path*"
-    },
+    }
+  ],
+  "headers": [
     {
-      "source": "/((?!assets|icons|favicon|apple-touch-icon|manifest|browserconfig).*)",
-      "destination": "/index.html"
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
     }
   ]
 }

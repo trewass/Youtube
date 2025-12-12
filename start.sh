@@ -36,3 +36,4 @@ trap "echo ''; echo '🛑 Остановка...'; kill $BACKEND_PID $FRONTEND_PI
 
 wait
 
+

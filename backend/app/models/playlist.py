@@ -25,3 +25,4 @@ class Playlist(Base):
     channel = relationship("Channel", back_populates="playlists")
     audiobooks = relationship("Audiobook", back_populates="playlist", cascade="all, delete-orphan")
 
+

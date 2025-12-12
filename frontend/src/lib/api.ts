@@ -1,6 +1,23 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+// Определяем API URL в зависимости от окружения
+const getApiUrl = () => {
+  // В продакшене на Vercel используем относительный путь или переменную окружения
+  if (import.meta.env.PROD) {
+    // Если есть переменная окружения - используем её
+    if (import.meta.env.VITE_API_URL) {
+      return import.meta.env.VITE_API_URL
+    }
+    // Иначе используем относительный путь (тот же домен)
+    return ''
+  }
+  // В разработке используем localhost
+  return import.meta.env.VITE_API_URL || 'http://localhost:8000'
+}
+
+const API_BASE_URL = getApiUrl()
+
+console.log('API Base URL:', API_BASE_URL || 'Same origin')
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,6 +25,22 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 })
+
+// Добавляем обработчик ошибок
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error)
+    if (error.response) {
+      console.error('Response error:', error.response.status, error.response.data)
+    } else if (error.request) {
+      console.error('Request error:', error.request)
+    } else {
+      console.error('Error:', error.message)
+    }
+    return Promise.reject(error)
+  }
+)
 
 // Types
 export interface Channel {
@@ -157,4 +190,5 @@ export const aiApi = {
 }
 
 export default api
+
 

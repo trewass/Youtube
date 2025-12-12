@@ -21,3 +21,4 @@ class Channel(Base):
     # Relationships
     playlists = relationship("Playlist", back_populates="channel", cascade="all, delete-orphan")
 
+

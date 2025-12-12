@@ -109,3 +109,4 @@ async def delete_note(note_id: int, db: Session = Depends(get_db)):
     
     return {"message": "Note deleted successfully"}
 
+

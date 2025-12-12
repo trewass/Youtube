@@ -123,3 +123,4 @@ async def delete_playlist(playlist_id: int, db: Session = Depends(get_db)):
     
     return {"message": "Playlist deleted successfully"}
 
+

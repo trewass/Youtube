@@ -106,3 +106,4 @@ async def get_discussion_history(note_id: int, db: Session = Depends(get_db)):
     except json.JSONDecodeError:
         return {"history": []}
 
+

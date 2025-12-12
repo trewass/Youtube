@@ -78,3 +78,4 @@ echo "  Frontend: cd frontend && npm run dev"
 echo ""
 echo "Или используйте: ./start.sh"
 
+

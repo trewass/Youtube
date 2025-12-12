@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, MessageSquare, Trash2, Send, Wifi, WifiOff, Download } from 'lucide-react'
+import { ArrowLeft, Plus, MessageSquare, Trash2, Send } from 'lucide-react'
 import { audiobooksApi, notesApi, aiApi, Audiobook, Note, ChatMessage } from '../lib/api'
-import { audioStorage } from '../lib/audioStorage'
-import { useAudioSource, AudioSource } from '../lib/useAudioSource'
 
 export default function AudiobookDetailPage() {
   const { audiobookId } = useParams<{ audiobookId: string }>()
@@ -18,11 +16,6 @@ export default function AudiobookDetailPage() {
   const [chatLoading, setChatLoading] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const navigate = useNavigate()
-
-  // Smart audio source
-  const audioSource = useAudioSource(audiobook)
-  const [downloadProgress, setDownloadProgress] = useState(0)
-  const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
     if (audiobookId) {
@@ -55,19 +48,19 @@ export default function AudiobookDetailPage() {
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault()
-
+    
     if (!newNote.content.trim()) return
 
     try {
       const currentTime = audioRef.current?.currentTime
-
+      
       await notesApi.createNote({
         content: newNote.content,
         quote: newNote.quote || undefined,
         timestamp: currentTime,
         audiobook_id: Number(audiobookId),
       })
-
+      
       setNewNote({ content: '', quote: '' })
       setShowAddNote(false)
       loadNotes()
@@ -95,7 +88,7 @@ export default function AudiobookDetailPage() {
 
   const handleStartChat = async (note: Note) => {
     setChatNote(note)
-
+    
     if (note.ai_discussion) {
       try {
         const response = await aiApi.getDiscussionHistory(note.id)
@@ -111,19 +104,19 @@ export default function AudiobookDetailPage() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-
+    
     if (!chatMessage.trim() || !chatNote) return
 
     try {
       setChatLoading(true)
-
+      
       const response = await aiApi.discussQuote({
         quote: chatNote.quote || chatNote.content,
         context: chatMessage,
         note_id: chatNote.id,
         history: chatHistory.length > 0 ? chatHistory : undefined,
       })
-
+      
       setChatHistory(response.data.history)
       setChatMessage('')
     } catch (error) {
@@ -154,7 +147,7 @@ export default function AudiobookDetailPage() {
       {/* Header */}
       <div className="flex items-center gap-3 sm:gap-4">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/audiobooks/${audiobook.playlist_id}`)}
           className="p-2 hover:bg-gray-800 active:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
         >
           <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
@@ -163,11 +156,6 @@ export default function AudiobookDetailPage() {
           <h2 className="text-lg sm:text-2xl font-bold line-clamp-2">{audiobook.title}</h2>
           {audiobook.ai_summary && (
             <p className="text-xs sm:text-sm text-gray-400 mt-1 line-clamp-2">{audiobook.ai_summary}</p>
-          )}
-          {!audiobook.ai_summary && (
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              Слушайте аудио, делайте заметки и обсуждайте с AI
-            </p>
           )}
         </div>
       </div>
@@ -179,7 +167,7 @@ export default function AudiobookDetailPage() {
             ref={audioRef}
             controls
             className="w-full"
-            src={audiobook.audio_file_path}
+            src={`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${audiobook.audio_file_path}`}
           >
             Ваш браузер не поддерживает аудио элемент.
           </audio>
@@ -232,8 +220,9 @@ export default function AudiobookDetailPage() {
               {notes.map((note) => (
                 <div
                   key={note.id}
-                  className={`bg-gray-800 rounded-lg p-3 sm:p-4 space-y-2 cursor-pointer hover:ring-2 hover:ring-primary-500 active:bg-gray-750 transition-all ${chatNote?.id === note.id ? 'ring-2 ring-primary-500' : ''
-                    }`}
+                  className={`bg-gray-800 rounded-lg p-3 sm:p-4 space-y-2 cursor-pointer hover:ring-2 hover:ring-primary-500 active:bg-gray-750 transition-all ${
+                    chatNote?.id === note.id ? 'ring-2 ring-primary-500' : ''
+                  }`}
                   onClick={() => handleStartChat(note)}
                 >
                   {note.quote && (
@@ -276,7 +265,7 @@ export default function AudiobookDetailPage() {
         {/* AI Chat */}
         <div className="bg-gray-800 rounded-lg p-3 sm:p-4 flex flex-col h-[400px] sm:h-[500px] lg:h-[600px]">
           <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">AI Обсуждение</h3>
-
+          
           {!chatNote ? (
             <div className="flex-1 flex items-center justify-center text-gray-400">
               <p className="text-sm sm:text-base text-center px-4">Выберите заметку для обсуждения</p>
@@ -287,10 +276,11 @@ export default function AudiobookDetailPage() {
                 {chatHistory.map((msg, index) => (
                   <div
                     key={index}
-                    className={`p-2.5 sm:p-3 rounded-lg ${msg.role === 'user'
-                      ? 'bg-primary-600 ml-6 sm:ml-8'
-                      : 'bg-gray-700 mr-6 sm:mr-8'
-                      }`}
+                    className={`p-2.5 sm:p-3 rounded-lg ${
+                      msg.role === 'user'
+                        ? 'bg-primary-600 ml-6 sm:ml-8'
+                        : 'bg-gray-700 mr-6 sm:mr-8'
+                    }`}
                   >
                     <p className="text-xs sm:text-sm whitespace-pre-wrap">{msg.content}</p>
                   </div>
@@ -301,7 +291,7 @@ export default function AudiobookDetailPage() {
                   </div>
                 )}
               </div>
-
+              
               <form onSubmit={handleSendMessage} className="flex gap-2">
                 <input
                   type="text"

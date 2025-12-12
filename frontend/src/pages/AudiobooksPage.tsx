@@ -56,33 +56,20 @@ export default function AudiobooksPage() {
   const handleDownload = async (audiobookId: number) => {
     try {
       setDownloading(audiobookId)
-      console.log('🔽 Starting download for audiobook:', audiobookId)
-
-      const response = await audiobooksApi.downloadAudiobook(audiobookId)
-      console.log('✅ Download API response:', response.data)
-
-      alert('Скачивание начато! Это может занять несколько минут. Следите за прогрессом.')
-
+      await audiobooksApi.downloadAudiobook(audiobookId)
+      alert('Скачивание начато! Это может занять некоторое время.')
+      
       // Poll for status update
       const interval = setInterval(async () => {
         try {
-          const statusResponse = await audiobooksApi.getAudiobook(audiobookId)
-          const updated = statusResponse.data
-
-          console.log('📊 Download progress:', {
-            id: updated.id,
-            progress: updated.download_progress,
-            is_downloaded: updated.is_downloaded,
-            is_converted: updated.is_converted
-          })
-
-          setAudiobooks(prev =>
+          const response = await audiobooksApi.getAudiobook(audiobookId)
+          const updated = response.data
+          
+          setAudiobooks(prev => 
             prev.map(ab => ab.id === audiobookId ? updated : ab)
           )
-
+          
           if (updated.is_downloaded && updated.is_converted) {
-            console.log('✅ Download completed!')
-            alert('Аудиокнига успешно скачана!')
             clearInterval(interval)
             setDownloading(null)
           }
@@ -90,18 +77,16 @@ export default function AudiobooksPage() {
           console.error('Error polling status:', error)
         }
       }, 3000)
-
+      
       // Clear interval after 5 minutes
       setTimeout(() => {
-        console.log('⏰ Download timeout reached')
         clearInterval(interval)
         setDownloading(null)
       }, 300000)
-
-    } catch (error: any) {
-      console.error('❌ Error downloading audiobook:', error)
-      const errorMessage = error.response?.data?.detail || error.message || 'Неизвестная ошибка'
-      alert(`Ошибка скачивания: ${errorMessage}\n\nПроверьте консоль для деталей (F12)`)
+      
+    } catch (error) {
+      console.error('Error downloading audiobook:', error)
+      alert('Ошибка скачивания')
       setDownloading(null)
     }
   }
@@ -114,23 +99,20 @@ export default function AudiobooksPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-4">
         <button
           onClick={() => navigate(`/playlists/${playlist?.channel_id}`)}
-          className="p-2 hover:bg-gray-800 active:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
+          className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
         >
-          <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
+          <ArrowLeft size={24} />
         </button>
-        <div className="min-w-0">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold line-clamp-2">{playlist?.title}</h2>
+        <div>
+          <h2 className="text-3xl font-bold">{playlist?.title}</h2>
           {playlist?.author && (
-            <p className="text-sm sm:text-base text-primary-400">Автор: {playlist.author}</p>
+            <p className="text-primary-400">Автор: {playlist.author}</p>
           )}
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Нажмите "Скачать" для загрузки аудио с YouTube
-          </p>
         </div>
       </div>
 
@@ -146,93 +128,85 @@ export default function AudiobooksPage() {
           <p className="text-sm mt-2">Сначала синхронизируйте плейлист</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {audiobooks.map((audiobook) => (
             <div key={audiobook.id} className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
-              <div className="p-3 flex gap-3">
-                <div className="w-20 h-20 sm:w-28 sm:h-20 rounded flex-shrink-0 overflow-hidden bg-gray-700">
-                  {audiobook.thumbnail_url ? (
-                    <img
-                      src={audiobook.thumbnail_url}
-                      alt={audiobook.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">
-                      📚
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-semibold text-sm sm:text-base line-clamp-2 leading-tight">{audiobook.title}</h3>
-
-                    <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-400">
-                      {audiobook.duration && (
-                        <span>{formatDuration(audiobook.duration)}</span>
-                      )}
-                      {audiobook.is_downloaded && (
-                        <span className="text-green-500 flex items-center gap-1">
-                          <CheckCircle size={12} />
-                          Скачано
-                        </span>
-                      )}
-                      {downloading === audiobook.id && (
-                        <span className="text-blue-500">
-                          {audiobook.download_progress.toFixed(0)}%
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
+              <div className="p-3 sm:p-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
+                {audiobook.thumbnail_url && (
+                  <img
+                    src={audiobook.thumbnail_url}
+                    alt={audiobook.title}
+                    className="w-full sm:w-32 h-40 sm:h-20 rounded object-cover flex-shrink-0"
+                  />
+                )}
+                
+                <div className="flex-1 space-y-2 min-w-0">
+                  <h3 className="font-semibold text-base sm:text-lg line-clamp-2">{audiobook.title}</h3>
+                  
                   {audiobook.ai_summary && (
                     <button
                       onClick={() => toggleDescription(audiobook.id)}
-                      className="flex items-center gap-1 text-xs text-primary-400 hover:text-primary-300 transition-colors mt-1 self-start"
+                      className="flex items-center gap-2 text-xs sm:text-sm text-primary-400 hover:text-primary-300 transition-colors"
                     >
                       {expandedDescriptions.has(audiobook.id) ? (
                         <>
-                          <ChevronUp size={14} />
-                          <span>Скрыть</span>
+                          <ChevronUp size={16} />
+                          <span>Скрыть описание</span>
                         </>
                       ) : (
                         <>
-                          <ChevronDown size={14} />
-                          <span>Описание</span>
+                          <ChevronDown size={16} />
+                          <span>Показать описание</span>
                         </>
                       )}
                     </button>
                   )}
+                  
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400">
+                    {audiobook.duration && (
+                      <span>{formatDuration(audiobook.duration)}</span>
+                    )}
+                    {audiobook.is_downloaded && (
+                      <span className="text-green-500 flex items-center gap-1">
+                        <CheckCircle size={14} />
+                        Скачано
+                      </span>
+                    )}
+                    {downloading === audiobook.id && (
+                      <span className="text-blue-500">
+                        Скачивание: {audiobook.download_progress.toFixed(0)}%
+                      </span>
+                    )}
+                  </div>
                 </div>
-
-                <div className="flex-shrink-0 self-center">
+                
+                <div className="flex sm:flex-col gap-2 flex-shrink-0">
                   {audiobook.is_downloaded ? (
                     <button
                       onClick={() => navigate(`/audiobook/${audiobook.id}`)}
-                      className="bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white px-3 py-2 rounded-lg transition-colors flex items-center gap-1.5 text-sm font-medium"
+                      className="flex-1 sm:flex-initial bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white px-4 py-2.5 sm:py-2 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap text-sm sm:text-base font-medium"
                     >
-                      <Play size={16} />
-                      <span className="hidden sm:inline">Открыть</span>
+                      <Play size={18} />
+                      Открыть
                     </button>
                   ) : (
                     <button
                       onClick={() => handleDownload(audiobook.id)}
                       disabled={downloading === audiobook.id}
-                      className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-3 py-2 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5 text-sm font-medium"
+                      className="flex-1 sm:flex-initial bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 py-2.5 sm:py-2 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap text-sm sm:text-base font-medium"
                     >
-                      <Download size={16} />
-                      <span className="hidden sm:inline">{downloading === audiobook.id ? 'Скачиваю...' : 'Скачать'}</span>
+                      <Download size={18} />
+                      {downloading === audiobook.id ? 'Скачивание...' : 'Скачать'}
                     </button>
                   )}
                 </div>
               </div>
-
+              
               {/* Collapsible description */}
               {audiobook.ai_summary && expandedDescriptions.has(audiobook.id) && (
-                <div className="px-3 pb-3 pt-0">
-                  <div className="bg-gray-900/50 rounded-lg p-3 border-l-4 border-primary-500">
-                    <p className="text-xs text-gray-300 leading-relaxed">
+                <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-0">
+                  <div className="bg-gray-900/50 rounded-lg p-3 sm:p-4 border-l-4 border-primary-500">
+                    <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
                       {audiobook.ai_summary}
                     </p>
                   </div>

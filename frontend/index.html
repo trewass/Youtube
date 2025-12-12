@@ -3,11 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     
-    <!-- Prevent caching during development -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
@@ -55,6 +50,22 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration - TEMPORARILY DISABLED -->
+    <script>
+      // Service Worker временно отключен для диагностики
+      console.log('Service Worker disabled for debugging');
+      
+      // Unregister existing service workers
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          registrations.forEach((registration) => {
+            registration.unregister();
+            console.log('Unregistered SW:', registration.scope);
+          });
+        });
+      }
+    </script>
   </body>
 </html>
 

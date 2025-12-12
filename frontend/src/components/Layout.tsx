@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Home, Library, FolderOpen } from 'lucide-react'
 
@@ -8,6 +8,10 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
+  
+  useEffect(() => {
+    console.log('📍 Current route:', location.pathname)
+  }, [location])
   
   const isActive = (path: string) => location.pathname === path
   
