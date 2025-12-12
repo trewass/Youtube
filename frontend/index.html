@@ -51,20 +51,54 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Service Worker Registration - TEMPORARILY DISABLED -->
+    <!-- Installation Prompt -->
     <script>
-      // Service Worker временно отключен для диагностики
-      console.log('Service Worker disabled for debugging');
+      // PWA Installation prompt
+      let deferredPrompt;
       
-      // Unregister existing service workers
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          registrations.forEach((registration) => {
-            registration.unregister();
-            console.log('Unregistered SW:', registration.scope);
-          });
-        });
-      }
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('💿 PWA установка доступна');
+        
+        // Показываем кастомную кнопку установки
+        const installButton = document.createElement('button');
+        installButton.style.cssText = `
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 50px;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+          font-weight: 600;
+          z-index: 1000;
+          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        `;
+        installButton.textContent = '📱 Установить приложение';
+        installButton.onclick = async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const result = await deferredPrompt.userChoice;
+            if (result.outcome === 'accepted') {
+              console.log('✅ PWA установлено');
+            }
+            deferredPrompt = null;
+            installButton.remove();
+          }
+        };
+        document.body.appendChild(installButton);
+      });
+      
+      window.addEventListener('appinstalled', () => {
+        console.log('🎉 PWA успешно установлено');
+        deferredPrompt = null;
+        const installButton = document.querySelector('button[onclick*="deferredPrompt"]');
+        if (installButton) installButton.remove();
+      });
     </script>
   </body>
 </html>

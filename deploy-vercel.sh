@@ -23,7 +23,7 @@ echo ""
 echo "🌐 Запуск деплоя на Vercel..."
 echo ""
 
-vercel --prod
+vercel --prod --yes
 
 echo ""
 echo "🎉 Деплой завершен!"

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Офлайн режим - Библиотека Аудиокниг</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #60a5fa;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+        
+        .retry-btn {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+        }
+        
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .home-btn {
+            background: transparent;
+            color: #60a5fa;
+            border: 2px solid #60a5fa;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .home-btn:hover {
+            background: #60a5fa;
+            color: #1a1a2e;
+        }
+        
+        .features {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .features h3 {
+            color: #60a5fa;
+            margin-bottom: 15px;
+        }
+        
+        .features ul {
+            list-style: none;
+        }
+        
+        .features li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 640px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📱</div>
+        <h1>Офлайн режим</h1>
+        <p>Вы сейчас работаете без подключения к интернету. Не беспокойтесь - многие функции по-прежнему доступны!</p>
+        
+        <div class="features">
+            <h3>Доступно офлайн:</h3>
+            <ul>
+                <li>Просмотр скачанных аудиокниг</li>
+                <li>Воспроизведение сохранённых файлов</li>
+                <li>Чтение заметок</li>
+                <li>Навигация по приложению</li>
+            </ul>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <button class="retry-btn" onclick="window.location.reload()">
+                Попробовать снова
+            </button>
+            <a href="/" class="home-btn">На главную</a>
+        </div>
+    </div>
+
+    <script>
+        // Проверяем состояние подключения
+        function checkOnlineStatus() {
+            if (navigator.onLine) {
+                window.location.href = '/';
+            }
+        }
+
+        // Слушаем события подключения
+        window.addEventListener('online', checkOnlineStatus);
+        
+        // Периодически проверяем подключение
+        setInterval(checkOnlineStatus, 5000);
+    </script>
+</body>
+</html>
