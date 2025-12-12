@@ -21,11 +21,3 @@ pydantic-settings>=2.6.0
 httpx>=0.28.0
 aiofiles>=24.1.0
 requests>=2.32.0
-
-# Background tasks
-celery>=5.4.0
-redis>=5.2.0
-
-# Auth (optional)
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
