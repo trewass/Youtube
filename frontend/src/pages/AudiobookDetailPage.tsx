@@ -27,11 +27,20 @@ export default function AudiobookDetailPage() {
   // Используем хук для определения источника аудио
   const audioSource = useAudioSource(audiobook)
 
+  const checkCachedStatus = async () => {
+    if (!audiobook) return
+    try {
+      const cached = await audioStorage.hasAudio(audiobook.id)
+      setIsCachedLocally(cached)
+    } catch (error) {
+      console.error('Error checking cache status:', error)
+    }
+  }
+
   useEffect(() => {
     if (audiobookId) {
       loadAudiobook()
       loadNotes()
-      checkCachedStatus()
     }
   }, [audiobookId])
 
@@ -42,16 +51,7 @@ export default function AudiobookDetailPage() {
     }
   }, [audiobook])
 
-  const checkCachedStatus = async () => {
-    if (!audiobook) return
-    try {
-      const cached = await audioStorage.hasAudio(audiobook.id)
-      setIsCachedLocally(cached)
-    } catch (error) {
-      console.error('Error checking cache status:', error)
-    }
-  }
-    
+  useEffect(() => {
     // Инициализация Web Speech API
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
