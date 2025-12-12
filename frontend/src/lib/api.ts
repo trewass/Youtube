@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:8000')
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -62,16 +62,16 @@ export interface ChatMessage {
 export const channelsApi = {
   addChannel: (url: string) =>
     api.post<Channel>('/api/channels/', { url }),
-  
+
   getChannels: () =>
     api.get<Channel[]>('/api/channels/'),
-  
+
   getChannel: (channelId: number) =>
     api.get<Channel>(`/api/channels/${channelId}`),
-  
+
   getChannelPlaylists: (channelId: number) =>
     api.get<Playlist[]>(`/api/channels/${channelId}/playlists`),
-  
+
   deleteChannel: (channelId: number) =>
     api.delete(`/api/channels/${channelId}`),
 }
@@ -80,16 +80,16 @@ export const channelsApi = {
 export const playlistsApi = {
   getPlaylists: () =>
     api.get<Playlist[]>('/api/playlists/'),
-  
+
   getPlaylist: (playlistId: number) =>
     api.get<Playlist>(`/api/playlists/${playlistId}`),
-  
+
   syncPlaylist: (playlistId: number) =>
     api.post(`/api/playlists/${playlistId}/sync`),
-  
+
   getPlaylistAudiobooks: (playlistId: number) =>
     api.get<Audiobook[]>(`/api/playlists/${playlistId}/audiobooks`),
-  
+
   deletePlaylist: (playlistId: number) =>
     api.delete(`/api/playlists/${playlistId}`),
 }
@@ -98,16 +98,16 @@ export const playlistsApi = {
 export const audiobooksApi = {
   getAudiobooks: (skip = 0, limit = 100) =>
     api.get<Audiobook[]>('/api/audiobooks/', { params: { skip, limit } }),
-  
+
   getAudiobook: (audiobookId: number) =>
     api.get<Audiobook>(`/api/audiobooks/${audiobookId}`),
-  
+
   downloadAudiobook: (audiobookId: number) =>
     api.post(`/api/audiobooks/${audiobookId}/download`),
-  
+
   generateSummary: (audiobookId: number) =>
     api.post(`/api/audiobooks/${audiobookId}/generate-summary`),
-  
+
   deleteAudiobook: (audiobookId: number) =>
     api.delete(`/api/audiobooks/${audiobookId}`),
 }
@@ -121,20 +121,20 @@ export const notesApi = {
     audiobook_id: number
   }) =>
     api.post<Note>('/api/notes/', data),
-  
+
   getNotes: (audiobookId?: number) =>
     api.get<Note[]>('/api/notes/', { params: { audiobook_id: audiobookId } }),
-  
+
   getNote: (noteId: number) =>
     api.get<Note>(`/api/notes/${noteId}`),
-  
+
   updateNote: (noteId: number, data: {
     content?: string
     quote?: string
     timestamp?: number
   }) =>
     api.put<Note>(`/api/notes/${noteId}`, data),
-  
+
   deleteNote: (noteId: number) =>
     api.delete(`/api/notes/${noteId}`),
 }
@@ -151,7 +151,7 @@ export const aiApi = {
       response: string
       history: ChatMessage[]
     }>('/api/ai/discuss', data),
-  
+
   getDiscussionHistory: (noteId: number) =>
     api.get<{ history: ChatMessage[] }>(`/api/ai/discussion/${noteId}`),
 }
