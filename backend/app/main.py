@@ -52,5 +52,11 @@ async def health():
 
 @app.get("/api/health")
 async def api_health():
-    return {"status": "ok", "service": "audiobook-api"}
+    import datetime
+    return {
+        "status": "ok", 
+        "service": "audiobook-api",
+        "version": "1.0.0",
+        "deployed_at": datetime.datetime.now().isoformat()
+    }
 
