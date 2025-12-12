@@ -6,6 +6,7 @@ import json
 
 from app.core.database import get_db
 from app.models.note import Note
+from app.models.audiobook import Audiobook
 from app.services.ai_service import ai_service
 
 router = APIRouter()
@@ -35,6 +36,20 @@ async def discuss_quote(
 ):
     """Обсуждение цитаты с AI"""
     
+    # Получаем информацию об аудиокниге для контекста
+    audiobook_context = None
+    if request.note_id:
+        note = db.query(Note).filter(Note.id == request.note_id).first()
+        if note:
+            audiobook = db.query(Audiobook).filter(Audiobook.id == note.audiobook_id).first()
+            if audiobook:
+                # Формируем контекст произведения
+                audiobook_context = {
+                    "title": audiobook.title,
+                    "description": audiobook.description or "",
+                    "ai_summary": audiobook.ai_summary or ""
+                }
+    
     # Подготавливаем историю разговора
     history_messages = []
     if request.history:
@@ -43,17 +58,32 @@ async def discuss_quote(
             for msg in request.history
         ]
     
-    # Получаем ответ от AI
-    response = ai_service.discuss_quote(
-        quote=request.quote,
-        context=request.context or "",
-        history=history_messages if history_messages else None
-    )
-    
-    if not response:
+    # Получаем ответ от AI с контекстом произведения
+    try:
+        response = ai_service.discuss_quote(
+            quote=request.quote,
+            context=request.context or "",
+            history=history_messages if history_messages else None,
+            audiobook_context=audiobook_context
+        )
+        
+        if not response:
+            # Проверяем, настроен ли API ключ
+            if not ai_service.api_key:
+                raise HTTPException(
+                    status_code=503,
+                    detail="OpenAI API key is not configured. Please set OPENAI_API_KEY environment variable."
+                )
+            raise HTTPException(
+                status_code=500,
+                detail="AI service error occurred. Please check logs for details."
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail="AI service not available or error occurred"
+            detail=f"AI service error: {str(e)}"
         )
     
     # Обновляем историю
@@ -61,10 +91,14 @@ async def discuss_quote(
     
     # Добавляем новый вопрос пользователя если нет истории
     if not history_messages:
-        user_message = f'"{request.quote}"\n\n{request.context or "Что это значит?"}'
+        context_text = request.context.strip() if request.context else "Что это значит?"
+        # Формируем первое сообщение с цитатой и вопросом
+        user_message = f'"{request.quote}"\n\n{context_text}'
         new_history.append({"role": "user", "content": user_message})
     else:
-        new_history.append({"role": "user", "content": request.context or ""})
+        # Если есть история, добавляем только новый вопрос пользователя
+        context_text = request.context.strip() if request.context else "Продолжай."
+        new_history.append({"role": "user", "content": context_text})
     
     # Добавляем ответ ассистента
     new_history.append({"role": "assistant", "content": response})

@@ -396,34 +396,67 @@ class AIService:
             print(f"Error generating summary: {e}")
             return None
 
-    def discuss_quote(self, quote: str, context: str = "", history: List[Dict] = None) -> Optional[str]:
-        """Обсуждение цитаты или фразы из книги"""
-        if not self.client:
+    def discuss_quote(self, quote: str, context: str = "", history: Optional[List[Dict]] = None, audiobook_context: Optional[Dict] = None) -> Optional[str]:
+        """Обсуждение цитаты с AI"""
+        if not self.api_key:
+            print("Error: OPENAI_API_KEY is not set")
             return None
         
+        if not self.client:
+            print("Error: OpenAI client is not initialized")
+            return None
+        
+        # Формируем контекст произведения для системного промпта
+        book_info = ""
+        if audiobook_context:
+            book_info_parts = []
+            if audiobook_context.get("title"):
+                book_info_parts.append(f"Название произведения: {audiobook_context['title']}")
+            if audiobook_context.get("ai_summary"):
+                book_info_parts.append(f"Описание сюжета: {audiobook_context['ai_summary']}")
+            elif audiobook_context.get("description"):
+                book_info_parts.append(f"Описание: {audiobook_context['description']}")
+            
+            if book_info_parts:
+                book_info = "\n".join(book_info_parts)
+        
+        # Формируем промпт
+        prompt = ""
+        if not history:
+            book_context_text = f"\n\nКОНТЕКСТ ПРОИЗВЕДЕНИЯ:\n{book_info}\n" if book_info else ""
+            prompt = f"""Помоги мне разобраться с этой цитатой из аудиокниги:
+
+"{quote}"
+{book_context_text}
+{f'Вопрос пользователя: {context}' if context else 'Что автор хотел сказать? Какой в этом смысл?'}
+
+ВАЖНО: Используй знание произведения из контекста выше. Не выдумывай факты, которые не соответствуют сюжету. Если не уверен в деталях, скажи об этом честно."""
+        else:
+            prompt = context  # Если есть история, контекст это новый вопрос пользователя
+
+        # Проверяем, что промпт не пустой
+        if not prompt or not prompt.strip():
+            print("Error: Empty prompt generated for discussion")
+            return None
+
+        # Формируем системный промпт с контекстом произведения
+        system_content = "Ты литературный аналитик, который помогает глубже понять смысл текстов. Отвечай развернуто, но не слишком академично. Помогай людям размышлять над прочитанным."
+        
+        if audiobook_context and book_info:
+            system_content += f"\n\nТы обсуждаешь цитату из следующего произведения:\n{book_info}\n\nИспользуй это знание для более точного и релевантного анализа. Не выдумывай факты, которые не соответствуют сюжету произведения."
+        
+        # Формируем сообщения
         messages = [
             {
                 "role": "system",
-                "content": "Ты литературный аналитик, который помогает глубже понять смысл текстов. Отвечай развернуто, но не слишком академично. Помогай людям размышлять над прочитанным."
+                "content": system_content
             }
         ]
         
         # Добавляем историю разговора если есть
         if history:
             messages.extend(history)
-        
-        # Формируем новый вопрос
-        if not history:
-            prompt = f"""Помоги мне разобраться с этой цитатой из аудиокниги:
-
-"{quote}"
-
-{f'Контекст: {context}' if context else ''}
-
-Что автор хотел сказать? Какой в этом смысл?"""
-        else:
-            prompt = context  # Если есть история, контекст это новый вопрос пользователя
-        
+            
         messages.append({"role": "user", "content": prompt})
         
         try:
@@ -436,7 +469,15 @@ class AIService:
             
             return response.choices[0].message.content.strip()
         except Exception as e:
-            print(f"Error discussing quote: {e}")
+            error_msg = str(e)
+            print(f"Error discussing quote: {error_msg}")
+            # Логируем более детальную информацию для отладки
+            if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
+                print("ERROR: OpenAI API key is invalid or expired")
+            elif "rate_limit" in error_msg.lower():
+                print("ERROR: OpenAI API rate limit exceeded")
+            elif "insufficient_quota" in error_msg.lower():
+                print("ERROR: OpenAI API quota exceeded")
             return None
 
     def extract_author_from_title(self, title: str) -> Optional[str]:
