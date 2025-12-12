@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, MessageSquare, Trash2, Send, Wifi, WifiOff, Download } from 'lucide-react'
+import { ArrowLeft, Plus, MessageSquare, Trash2, Send } from 'lucide-react'
 import { audiobooksApi, notesApi, aiApi, Audiobook, Note, ChatMessage } from '../lib/api'
-import { audioStorage } from '../lib/audioStorage'
-import { useAudioSource, AudioSource } from '../lib/useAudioSource'
 
 export default function AudiobookDetailPage() {
   const { audiobookId } = useParams<{ audiobookId: string }>()
@@ -18,11 +16,6 @@ export default function AudiobookDetailPage() {
   const [chatLoading, setChatLoading] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const navigate = useNavigate()
-
-  // Smart audio source
-  const audioSource = useAudioSource(audiobook)
-  const [downloadProgress, setDownloadProgress] = useState(0)
-  const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
     if (audiobookId) {
