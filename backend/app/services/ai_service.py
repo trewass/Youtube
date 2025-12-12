@@ -175,23 +175,8 @@ class AIService:
             print(f"Error generating summary: {e}")
             return None
 
-    def discuss_quote(self, quote: str, context: str = "", history: List[Dict] = None) -> Optional[str]:
-        """Обсуждение цитаты или фразы из книги"""
-        if not self.client:
-            return None
-        
-        messages = [
-            {
-                "role": "system",
-                "content": "Ты литературный аналитик, который помогает глубже понять смысл текстов. Отвечай развернуто, но не слишком академично. Помогай людям размышлять над прочитанным."
-            }
-        ]
-        
-        # Добавляем историю разговора если есть
-        if history:
-            messages.extend(history)
-        
-        # Формируем новый вопрос
+        # Формируем промпт
+        prompt = ""
         if not history:
             prompt = f"""Помоги мне разобраться с этой цитатой из аудиокниги:
 
@@ -202,7 +187,24 @@ class AIService:
 Что автор хотел сказать? Какой в этом смысл?"""
         else:
             prompt = context  # Если есть история, контекст это новый вопрос пользователя
+
+        # Проверяем, что промпт не пустой
+        if not prompt or not prompt.strip():
+            print("Error: Empty prompt generated for discussion")
+            return None
+
+        # Формируем сообщения
+        messages = [
+            {
+                "role": "system",
+                "content": "Ты литературный аналитик, который помогает глубже понять смысл текстов. Отвечай развернуто, но не слишком академично. Помогай людям размышлять над прочитанным."
+            }
+        ]
         
+        # Добавляем историю разговора если есть
+        if history:
+            messages.extend(history)
+            
         messages.append({"role": "user", "content": prompt})
         
         try:

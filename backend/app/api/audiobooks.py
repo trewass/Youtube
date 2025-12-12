@@ -82,6 +82,33 @@ def download_and_convert(audiobook_id: int, db: Session):
         
         db.commit()
         
+        # Генерируем AI описание (отдельный коммит, чтобы не блокировать основной)
+        try:
+            if not audiobook.ai_summary:
+                summary = ai_service.generate_book_summary(
+                    audiobook.title,
+                    audiobook.description or ""
+                )
+                if summary:
+                    audiobook.ai_summary = summary
+                elif audiobook.description:
+                    # Fallback к описанию с YouTube, если AI не сработал
+                    # Берем первые 200 символов и обрезаем до ближайшего пробела
+                    desc_preview = audiobook.description[:200]
+                    if len(audiobook.description) > 200:
+                        last_space = desc_preview.rfind(' ')
+                        if last_space > 0:
+                            desc_preview = desc_preview[:last_space] + "..."
+                    audiobook.ai_summary = desc_preview
+                
+                db.commit()
+        except Exception as ai_error:
+            print(f"Error generating summary for {audiobook_id}: {ai_error}")
+            # Fallback при ошибке
+            if audiobook.description and not audiobook.ai_summary:
+                audiobook.ai_summary = audiobook.description[:150] + "..."
+                db.commit()
+        
     except Exception as e:
         print(f"Error downloading audiobook {audiobook_id}: {e}")
         audiobook.download_progress = 0.0
@@ -148,6 +175,19 @@ async def generate_summary(audiobook_id: int, db: Session = Depends(get_db)):
         audiobook.ai_summary = summary
         db.commit()
         db.refresh(audiobook)
+    
+    return {"summary": summary}
+
+    if summary:
+        audiobook.ai_summary = summary
+        db.commit()
+        db.refresh(audiobook)
+    elif audiobook.description:
+        # Fallback к описанию, если AI вернул None
+        audiobook.ai_summary = audiobook.description[:200] + "..."
+        db.commit()
+        db.refresh(audiobook)
+        summary = audiobook.ai_summary
     
     return {"summary": summary}
 

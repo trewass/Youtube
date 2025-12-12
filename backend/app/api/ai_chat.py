@@ -61,10 +61,16 @@ async def discuss_quote(
     
     # Добавляем новый вопрос пользователя если нет истории
     if not history_messages:
-        user_message = f'"{request.quote}"\n\n{request.context or "Что это значит?"}'
+        context_text = request.context.strip() if request.context else ""
+        if not context_text:
+            context_text = "Что это значит?"
+            
+        user_message = f'"{request.quote}"\n\n{context_text}'
         new_history.append({"role": "user", "content": user_message})
     else:
-        new_history.append({"role": "user", "content": request.context or ""})
+        # Если есть история, проверяем наличие контекста
+        context_text = request.context.strip() if request.context else "Продолжай."
+        new_history.append({"role": "user", "content": context_text})
     
     # Добавляем ответ ассистента
     new_history.append({"role": "assistant", "content": response})
