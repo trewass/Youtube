@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, MessageSquare, Trash2, Send, Mic, MicOff } from 'lucide-react'
+import { ArrowLeft, Plus, MessageSquare, Trash2, Send, Mic, MicOff, Download, CheckCircle, WifiOff } from 'lucide-react'
 import { audiobooksApi, notesApi, aiApi, Audiobook, Note, ChatMessage } from '../lib/api'
+import { audioStorage } from '../lib/audioStorage'
+import { useAudioSource } from '../lib/useAudioSource'
 
 export default function AudiobookDetailPage() {
   const { audiobookId } = useParams<{ audiobookId: string }>()
@@ -16,14 +18,39 @@ export default function AudiobookDetailPage() {
   const [chatLoading, setChatLoading] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
+  const [isDownloadingOffline, setIsDownloadingOffline] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState(0)
+  const [isCachedLocally, setIsCachedLocally] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
   const navigate = useNavigate()
+  
+  // Используем хук для определения источника аудио
+  const audioSource = useAudioSource(audiobook)
 
   useEffect(() => {
     if (audiobookId) {
       loadAudiobook()
       loadNotes()
+      checkCachedStatus()
     }
+  }, [audiobookId])
+
+  useEffect(() => {
+    // Проверяем статус кэша при изменении аудиокниги
+    if (audiobook) {
+      checkCachedStatus()
+    }
+  }, [audiobook])
+
+  const checkCachedStatus = async () => {
+    if (!audiobook) return
+    try {
+      const cached = await audioStorage.hasAudio(audiobook.id)
+      setIsCachedLocally(cached)
+    } catch (error) {
+      console.error('Error checking cache status:', error)
+    }
+  }
     
     // Инициализация Web Speech API
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -128,6 +155,70 @@ export default function AudiobookDetailPage() {
     if (recognition && isRecording) {
       recognition.stop()
       setIsRecording(false)
+    }
+  }
+
+  const handleDownloadForOffline = async () => {
+    if (!audiobook || !audiobook.audio_file_path) {
+      alert('Аудиофайл еще не готов. Сначала скачайте его на сервер.')
+      return
+    }
+
+    if (isCachedLocally) {
+      if (confirm('Файл уже скачан. Удалить и скачать заново?')) {
+        await audioStorage.deleteAudio(audiobook.id)
+        setIsCachedLocally(false)
+      } else {
+        return
+      }
+    }
+
+    try {
+      setIsDownloadingOffline(true)
+      setDownloadProgress(0)
+
+      // Получаем URL файла
+      const audioUrl = audiobook.audio_file_path.startsWith('http')
+        ? audiobook.audio_file_path
+        : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${audiobook.audio_file_path}`
+
+      // Скачиваем и сохраняем в IndexedDB
+      await audioStorage.downloadAndSave(
+        audiobook.id,
+        audioUrl,
+        audiobook.title,
+        (progress) => {
+          setDownloadProgress(progress)
+        }
+      )
+
+      setIsCachedLocally(true)
+      alert('✅ Аудиокнига скачана на устройство! Теперь доступна офлайн.')
+      
+      // Обновляем источник аудио
+      audioSource.refresh()
+    } catch (error: any) {
+      console.error('Error downloading for offline:', error)
+      alert(`Ошибка скачивания: ${error.message || 'Неизвестная ошибка'}`)
+    } finally {
+      setIsDownloadingOffline(false)
+      setDownloadProgress(0)
+    }
+  }
+
+  const handleDeleteOffline = async () => {
+    if (!audiobook) return
+    
+    if (!confirm('Удалить скачанный файл с устройства?')) return
+
+    try {
+      await audioStorage.deleteAudio(audiobook.id)
+      setIsCachedLocally(false)
+      alert('Файл удален с устройства')
+      audioSource.refresh()
+    } catch (error) {
+      console.error('Error deleting offline file:', error)
+      alert('Ошибка удаления файла')
     }
   }
 
@@ -236,15 +327,74 @@ export default function AudiobookDetailPage() {
 
       {/* Audio Player */}
       {audiobook.audio_file_path && (
-        <div className="bg-gray-800 rounded-lg p-3 sm:p-6">
+        <div className="bg-gray-800 rounded-lg p-3 sm:p-6 space-y-3">
+          {/* Статус офлайн скачивания */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {isCachedLocally ? (
+                <>
+                  <CheckCircle size={20} className="text-green-500" />
+                  <span className="text-sm text-green-400">Скачано на устройство</span>
+                  <button
+                    onClick={handleDeleteOffline}
+                    className="text-xs text-red-400 hover:text-red-300 ml-2"
+                  >
+                    Удалить
+                  </button>
+                </>
+              ) : (
+                <>
+                  <WifiOff size={20} className="text-yellow-500" />
+                  <span className="text-sm text-gray-400">Только онлайн</span>
+                </>
+              )}
+            </div>
+            
+            {!isCachedLocally && (
+              <button
+                onClick={handleDownloadForOffline}
+                disabled={isDownloadingOffline || !navigator.onLine}
+                className="bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2 text-sm font-medium"
+              >
+                {isDownloadingOffline ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Скачиваю... {downloadProgress.toFixed(0)}%</span>
+                  </>
+                ) : (
+                  <>
+                    <Download size={18} />
+                    <span>Скачать для офлайн</span>
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* Прогресс скачивания */}
+          {isDownloadingOffline && (
+            <div className="w-full bg-gray-700 rounded-full h-2">
+              <div
+                className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${downloadProgress}%` }}
+              />
+            </div>
+          )}
+
           <audio
             ref={audioRef}
             controls
             className="w-full"
-            src={audiobook.audio_file_path}
+            src={audioSource.url || audiobook.audio_file_path}
           >
             Ваш браузер не поддерживает аудио элемент.
           </audio>
+          
+          {audioSource.isCached && (
+            <p className="text-xs text-green-400 text-center">
+              🎧 Воспроизведение из локального хранилища (офлайн)
+            </p>
+          )}
         </div>
       )}
 
