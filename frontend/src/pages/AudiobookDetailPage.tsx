@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Plus, MessageSquare, Trash2, Send } from 'lucide-react'
+import { ArrowLeft, Plus, MessageSquare, Trash2, Send, Mic, MicOff } from 'lucide-react'
 import { audiobooksApi, notesApi, aiApi, Audiobook, Note, ChatMessage } from '../lib/api'
 
 export default function AudiobookDetailPage() {
@@ -14,6 +14,8 @@ export default function AudiobookDetailPage() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [chatMessage, setChatMessage] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
   const navigate = useNavigate()
 
@@ -21,6 +23,43 @@ export default function AudiobookDetailPage() {
     if (audiobookId) {
       loadAudiobook()
       loadNotes()
+    }
+    
+    // Инициализация Web Speech API
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      const recognitionInstance = new SpeechRecognition()
+      recognitionInstance.continuous = false
+      recognitionInstance.interimResults = false
+      recognitionInstance.lang = 'ru-RU'
+      
+      recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = event.results[0][0].transcript
+        setNewNote(prev => ({ ...prev, content: prev.content + (prev.content ? ' ' : '') + transcript }))
+        setIsRecording(false)
+      }
+      
+      recognitionInstance.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error)
+        setIsRecording(false)
+        if (event.error === 'no-speech') {
+          alert('Речь не распознана. Попробуйте еще раз.')
+        } else if (event.error === 'not-allowed') {
+          alert('Доступ к микрофону запрещен. Разрешите доступ в настройках браузера.')
+        }
+      }
+      
+      recognitionInstance.onend = () => {
+        setIsRecording(false)
+      }
+      
+      setRecognition(recognitionInstance)
+    }
+    
+    return () => {
+      if (recognition) {
+        recognition.stop()
+      }
     }
   }, [audiobookId])
 
@@ -67,6 +106,28 @@ export default function AudiobookDetailPage() {
     } catch (error) {
       console.error('Error adding note:', error)
       alert('Ошибка добавления заметки')
+    }
+  }
+
+  const handleStartRecording = () => {
+    if (!recognition) {
+      alert('Голосовой ввод не поддерживается в вашем браузере')
+      return
+    }
+
+    try {
+      setIsRecording(true)
+      recognition.start()
+    } catch (error) {
+      console.error('Error starting recognition:', error)
+      setIsRecording(false)
+    }
+  }
+
+  const handleStopRecording = () => {
+    if (recognition && isRecording) {
+      recognition.stop()
+      setIsRecording(false)
     }
   }
 
@@ -210,13 +271,30 @@ export default function AudiobookDetailPage() {
                 placeholder="Цитата (опционально)"
                 className="w-full bg-gray-700 text-white px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
-              <textarea
-                value={newNote.content}
-                onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
-                placeholder="Ваша заметка..."
-                rows={3}
-                className="w-full bg-gray-700 text-white px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
+              <div className="relative">
+                <textarea
+                  value={newNote.content}
+                  onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
+                  placeholder="Ваша заметка... (или нажмите микрофон для голосового ввода)"
+                  rows={3}
+                  className="w-full bg-gray-700 text-white px-3 sm:px-4 py-2 pr-10 sm:pr-12 text-sm sm:text-base rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+                <button
+                  type="button"
+                  onClick={isRecording ? handleStopRecording : handleStartRecording}
+                  className={`absolute right-2 top-2 p-2 rounded-lg transition-colors ${
+                    isRecording
+                      ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse'
+                      : 'bg-gray-600 hover:bg-gray-500 text-gray-300'
+                  }`}
+                  title={isRecording ? 'Остановить запись' : 'Начать голосовой ввод'}
+                >
+                  {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
+                </button>
+              </div>
+              {isRecording && (
+                <p className="text-xs text-red-400 animate-pulse">Идет запись... Говорите</p>
+              )}
               <button
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white py-2.5 sm:py-2 rounded-lg transition-colors text-sm sm:text-base font-medium"

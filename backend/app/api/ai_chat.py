@@ -6,6 +6,7 @@ import json
 
 from app.core.database import get_db
 from app.models.note import Note
+from app.models.audiobook import Audiobook
 from app.services.ai_service import ai_service
 
 router = APIRouter()
@@ -35,6 +36,20 @@ async def discuss_quote(
 ):
     """Обсуждение цитаты с AI"""
     
+    # Получаем информацию об аудиокниге для контекста
+    audiobook_context = None
+    if request.note_id:
+        note = db.query(Note).filter(Note.id == request.note_id).first()
+        if note:
+            audiobook = db.query(Audiobook).filter(Audiobook.id == note.audiobook_id).first()
+            if audiobook:
+                # Формируем контекст произведения
+                audiobook_context = {
+                    "title": audiobook.title,
+                    "description": audiobook.description or "",
+                    "ai_summary": audiobook.ai_summary or ""
+                }
+    
     # Подготавливаем историю разговора
     history_messages = []
     if request.history:
@@ -43,12 +58,13 @@ async def discuss_quote(
             for msg in request.history
         ]
     
-    # Получаем ответ от AI
+    # Получаем ответ от AI с контекстом произведения
     try:
         response = ai_service.discuss_quote(
             quote=request.quote,
             context=request.context or "",
-            history=history_messages if history_messages else None
+            history=history_messages if history_messages else None,
+            audiobook_context=audiobook_context
         )
         
         if not response:

@@ -175,7 +175,7 @@ class AIService:
             print(f"Error generating summary: {e}")
             return None
 
-    def discuss_quote(self, quote: str, context: str = "", history: Optional[List[Dict]] = None) -> Optional[str]:
+    def discuss_quote(self, quote: str, context: str = "", history: Optional[List[Dict]] = None, audiobook_context: Optional[Dict] = None) -> Optional[str]:
         """Обсуждение цитаты с AI"""
         if not self.api_key:
             print("Error: OPENAI_API_KEY is not set")
@@ -185,16 +185,31 @@ class AIService:
             print("Error: OpenAI client is not initialized")
             return None
         
+        # Формируем контекст произведения для системного промпта
+        book_info = ""
+        if audiobook_context:
+            book_info_parts = []
+            if audiobook_context.get("title"):
+                book_info_parts.append(f"Название произведения: {audiobook_context['title']}")
+            if audiobook_context.get("ai_summary"):
+                book_info_parts.append(f"Описание сюжета: {audiobook_context['ai_summary']}")
+            elif audiobook_context.get("description"):
+                book_info_parts.append(f"Описание: {audiobook_context['description']}")
+            
+            if book_info_parts:
+                book_info = "\n".join(book_info_parts)
+        
         # Формируем промпт
         prompt = ""
         if not history:
+            book_context_text = f"\n\nКОНТЕКСТ ПРОИЗВЕДЕНИЯ:\n{book_info}\n" if book_info else ""
             prompt = f"""Помоги мне разобраться с этой цитатой из аудиокниги:
 
 "{quote}"
+{book_context_text}
+{f'Вопрос пользователя: {context}' if context else 'Что автор хотел сказать? Какой в этом смысл?'}
 
-{f'Контекст: {context}' if context else ''}
-
-Что автор хотел сказать? Какой в этом смысл?"""
+ВАЖНО: Используй знание произведения из контекста выше. Не выдумывай факты, которые не соответствуют сюжету. Если не уверен в деталях, скажи об этом честно."""
         else:
             prompt = context  # Если есть история, контекст это новый вопрос пользователя
 
@@ -203,11 +218,17 @@ class AIService:
             print("Error: Empty prompt generated for discussion")
             return None
 
+        # Формируем системный промпт с контекстом произведения
+        system_content = "Ты литературный аналитик, который помогает глубже понять смысл текстов. Отвечай развернуто, но не слишком академично. Помогай людям размышлять над прочитанным."
+        
+        if audiobook_context and book_info:
+            system_content += f"\n\nТы обсуждаешь цитату из следующего произведения:\n{book_info}\n\nИспользуй это знание для более точного и релевантного анализа. Не выдумывай факты, которые не соответствуют сюжету произведения."
+        
         # Формируем сообщения
         messages = [
             {
                 "role": "system",
-                "content": "Ты литературный аналитик, который помогает глубже понять смысл текстов. Отвечай развернуто, но не слишком академично. Помогай людям размышлять над прочитанным."
+                "content": system_content
             }
         ]
         
