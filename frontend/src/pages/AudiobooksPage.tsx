@@ -131,23 +131,8 @@ export default function AudiobooksPage() {
         <div className="space-y-4">
           {audiobooks.map((audiobook) => (
             <div key={audiobook.id} className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-750 transition-colors">
-<<<<<<< HEAD
               <div className="p-3 sm:p-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
-                {audiobook.thumbnail_url && (
-                  <img
-                    src={audiobook.thumbnail_url}
-                    alt={audiobook.title}
-                    className="w-full sm:w-32 h-40 sm:h-20 rounded object-cover flex-shrink-0"
-                  />
-                )}
-                
-                <div className="flex-1 space-y-2 min-w-0">
-                  <h3 className="font-semibold text-base sm:text-lg line-clamp-2">{audiobook.title}</h3>
-                  
-                  {audiobook.ai_summary && (
-=======
-              <div className="p-3 flex gap-3">
-                <div className="w-20 h-20 sm:w-28 sm:h-20 rounded flex-shrink-0 overflow-hidden bg-gray-700">
+                <div className="w-full sm:w-32 h-40 sm:h-20 rounded flex-shrink-0 overflow-hidden bg-gray-700">
                   {audiobook.thumbnail_url ? (
                     <img
                       src={audiobook.thumbnail_url}
@@ -160,31 +145,11 @@ export default function AudiobooksPage() {
                     </div>
                   )}
                 </div>
-
-                <div className="flex-1 min-w-0 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-semibold text-sm sm:text-base line-clamp-2 leading-tight">{audiobook.title}</h3>
-
-                    <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-gray-400">
-                      {audiobook.duration && (
-                        <span>{formatDuration(audiobook.duration)}</span>
-                      )}
-                      {audiobook.is_downloaded && (
-                        <span className="text-green-500 flex items-center gap-1">
-                          <CheckCircle size={12} />
-                          Скачано
-                        </span>
-                      )}
-                      {downloading === audiobook.id && (
-                        <span className="text-blue-500">
-                          {audiobook.download_progress.toFixed(0)}%
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
+                
+                <div className="flex-1 space-y-2 min-w-0">
+                  <h3 className="font-semibold text-base sm:text-lg line-clamp-2">{audiobook.title}</h3>
+                  
                   {(audiobook.ai_summary || audiobook.description) && (
->>>>>>> 3f0096c1fee5d62ce2d82fed00f65a59d2f2c791
                     <button
                       onClick={() => toggleDescription(audiobook.id)}
                       className="flex items-center gap-2 text-xs sm:text-sm text-primary-400 hover:text-primary-300 transition-colors"
@@ -244,19 +209,11 @@ export default function AudiobooksPage() {
               </div>
               
               {/* Collapsible description */}
-<<<<<<< HEAD
-              {audiobook.ai_summary && expandedDescriptions.has(audiobook.id) && (
+              {(audiobook.ai_summary || audiobook.description) && expandedDescriptions.has(audiobook.id) && (
                 <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-0">
                   <div className="bg-gray-900/50 rounded-lg p-3 sm:p-4 border-l-4 border-primary-500">
                     <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                      {audiobook.ai_summary}
-=======
-              {(audiobook.ai_summary || audiobook.description) && expandedDescriptions.has(audiobook.id) && (
-                <div className="px-3 pb-3 pt-0">
-                  <div className="bg-gray-900/50 rounded-lg p-3 border-l-4 border-primary-500">
-                    <p className="text-xs text-gray-300 leading-relaxed">
                       {audiobook.ai_summary || audiobook.description}
->>>>>>> 3f0096c1fee5d62ce2d82fed00f65a59d2f2c791
                     </p>
                   </div>
                 </div>
