@@ -44,16 +44,30 @@ async def discuss_quote(
         ]
     
     # Получаем ответ от AI
-    response = ai_service.discuss_quote(
-        quote=request.quote,
-        context=request.context or "",
-        history=history_messages if history_messages else None
-    )
-    
-    if not response:
+    try:
+        response = ai_service.discuss_quote(
+            quote=request.quote,
+            context=request.context or "",
+            history=history_messages if history_messages else None
+        )
+        
+        if not response:
+            # Проверяем, настроен ли API ключ
+            if not ai_service.api_key:
+                raise HTTPException(
+                    status_code=503,
+                    detail="OpenAI API key is not configured. Please set OPENAI_API_KEY environment variable."
+                )
+            raise HTTPException(
+                status_code=500,
+                detail="AI service error occurred. Please check logs for details."
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail="AI service not available or error occurred"
+            detail=f"AI service error: {str(e)}"
         )
     
     # Обновляем историю

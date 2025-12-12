@@ -177,7 +177,12 @@ class AIService:
 
     def discuss_quote(self, quote: str, context: str = "", history: Optional[List[Dict]] = None) -> Optional[str]:
         """Обсуждение цитаты с AI"""
-        if not self.api_key or not self.client:
+        if not self.api_key:
+            print("Error: OPENAI_API_KEY is not set")
+            return None
+        
+        if not self.client:
+            print("Error: OpenAI client is not initialized")
             return None
         
         # Формируем промпт
@@ -222,7 +227,15 @@ class AIService:
             
             return response.choices[0].message.content.strip()
         except Exception as e:
-            print(f"Error discussing quote: {e}")
+            error_msg = str(e)
+            print(f"Error discussing quote: {error_msg}")
+            # Логируем более детальную информацию для отладки
+            if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
+                print("ERROR: OpenAI API key is invalid or expired")
+            elif "rate_limit" in error_msg.lower():
+                print("ERROR: OpenAI API rate limit exceeded")
+            elif "insufficient_quota" in error_msg.lower():
+                print("ERROR: OpenAI API quota exceeded")
             return None
 
     def extract_author_from_title(self, title: str) -> Optional[str]:
