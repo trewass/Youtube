@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+/// <reference lib="webworker" />
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'

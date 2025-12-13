@@ -6,7 +6,8 @@
       "Bash(npx vercel:*)",
       "Bash(chmod:*)",
       "Bash(./deploy-vercel.sh)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
