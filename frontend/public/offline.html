@@ -1,171 +1,306 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Офлайн режим - Библиотека Аудиокниг</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .container {
-            text-align: center;
-            max-width: 500px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.8;
-        }
-        
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 15px;
-            color: #60a5fa;
-        }
-        
-        p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            opacity: 0.9;
-        }
-        
-        .retry-btn {
-            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-right: 10px;
-        }
-        
-        .retry-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
-        }
-        
-        .home-btn {
-            background: transparent;
-            color: #60a5fa;
-            border: 2px solid #60a5fa;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .home-btn:hover {
-            background: #60a5fa;
-            color: #1a1a2e;
-        }
-        
-        .features {
-            margin-top: 30px;
-            text-align: left;
-        }
-        
-        .features h3 {
-            color: #60a5fa;
-            margin-bottom: 15px;
-        }
-        
-        .features ul {
-            list-style: none;
-        }
-        
-        .features li {
-            margin-bottom: 8px;
-            padding-left: 20px;
-            position: relative;
-        }
-        
-        .features li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #10b981;
-            font-weight: bold;
-        }
-        
-        @media (max-width: 640px) {
-            .container {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 1.5rem;
-            }
-            
-            .icon {
-                font-size: 3rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Офлайн режим - AudioBooks</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      text-align: center;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+      }
+    }
+
+    .icon svg {
+      width: 60px;
+      height: 60px;
+      color: white;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    p {
+      font-size: 16px;
+      color: #9ca3af;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 50px;
+      margin-bottom: 30px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status.online {
+      background: rgba(34, 197, 94, 0.1);
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    .status.online .status-dot {
+      background: #22c55e;
+      animation: none;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: rgba(75, 85, 99, 0.3);
+      color: #d1d5db;
+      border: 1px solid rgba(75, 85, 99, 0.5);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(75, 85, 99, 0.5);
+      border-color: rgba(75, 85, 99, 0.7);
+    }
+
+    .features {
+      background: rgba(31, 41, 55, 0.5);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: left;
+    }
+
+    .features h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: #60a5fa;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: #d1d5db;
+    }
+
+    .feature-list li::before {
+      content: '✓';
+      width: 24px;
+      height: 24px;
+      background: rgba(34, 197, 94, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #22c55e;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 24px;
+      }
+      
+      .icon {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .icon svg {
+        width: 50px;
+        height: 50px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="icon">📱</div>
-        <h1>Офлайн режим</h1>
-        <p>Вы сейчас работаете без подключения к интернету. Не беспокойтесь - многие функции по-прежнему доступны!</p>
-        
-        <div class="features">
-            <h3>Доступно офлайн:</h3>
-            <ul>
-                <li>Просмотр скачанных аудиокниг</li>
-                <li>Воспроизведение сохранённых файлов</li>
-                <li>Чтение заметок</li>
-                <li>Навигация по приложению</li>
-            </ul>
-        </div>
-        
-        <div style="margin-top: 30px;">
-            <button class="retry-btn" onclick="window.location.reload()">
-                Попробовать снова
-            </button>
-            <a href="/" class="home-btn">На главную</a>
-        </div>
+  <div class="container">
+    <div class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"/>
+      </svg>
     </div>
 
-    <script>
-        // Проверяем состояние подключения
-        function checkOnlineStatus() {
-            if (navigator.onLine) {
-                window.location.href = '/';
-            }
-        }
+    <h1>Офлайн режим</h1>
+    
+    <div class="status" id="status">
+      <span class="status-dot"></span>
+      <span id="statusText">Подключение отсутствует</span>
+    </div>
 
-        // Слушаем события подключения
-        window.addEventListener('online', checkOnlineStatus);
+    <p>
+      Вы сейчас в офлайн режиме. Но не волнуйтесь! 
+      Все скачанные аудиокниги и заметки доступны для использования.
+    </p>
+
+    <div class="buttons">
+      <button class="btn-primary" onclick="location.href='/'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Перейти к библиотеке
+      </button>
+      
+      <button class="btn-secondary" onclick="location.reload()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Попробовать снова
+      </button>
+    </div>
+
+    <div class="features">
+      <h2>Доступно офлайн:</h2>
+      <ul class="feature-list">
+        <li>Воспроизведение скачанных аудиокниг</li>
+        <li>Просмотр и создание заметок</li>
+        <li>Чтение AI описаний</li>
+        <li>Навигация по библиотеке</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Проверка статуса подключения
+    function updateOnlineStatus() {
+      const status = document.getElementById('status')
+      const statusText = document.getElementById('statusText')
+      
+      if (navigator.onLine) {
+        status.classList.add('online')
+        statusText.textContent = 'Подключение восстановлено!'
         
-        // Периодически проверяем подключение
-        setInterval(checkOnlineStatus, 5000);
-    </script>
+        // Автоматически перенаправляем на главную через 2 секунды
+        setTimeout(() => {
+          location.href = '/'
+        }, 2000)
+      } else {
+        status.classList.remove('online')
+        statusText.textContent = 'Подключение отсутствует'
+      }
+    }
+
+    // Слушаем изменения статуса
+    window.addEventListener('online', updateOnlineStatus)
+    window.addEventListener('offline', updateOnlineStatus)
+    
+    // Проверяем статус при загрузке
+    updateOnlineStatus()
+  </script>
 </body>
 </html>

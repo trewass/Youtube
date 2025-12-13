@@ -23,39 +23,60 @@ try {
   )
   console.log('✅ App rendered successfully')
 
-  // Регистрируем Service Worker для PWA
-  if ('serviceWorker' in navigator && import.meta.env.PROD) {
-    window.addEventListener('load', async () => {
-      try {
-        const registration = await navigator.serviceWorker.register('/sw.js', {
-          scope: '/'
-        })
-        
-        console.log('✅ Service Worker registered:', registration.scope)
-        
-        // Обработка обновлений
+  // Регистрируем Service Worker через VitePWA
+  if ('serviceWorker' in navigator) {
+    // VitePWA автоматически регистрирует SW, но мы добавляем обработчики
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.ready.then((registration) => {
+        console.log('✅ Service Worker активен:', registration.scope)
+
+        // Проверка обновлений каждые 60 секунд
+        setInterval(() => {
+          registration.update()
+        }, 60000)
+
+        // Обработка обновлений Service Worker
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing
+
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 console.log('🔄 Новая версия приложения доступна!')
-                // Можно показать уведомление пользователю о доступном обновлении
+
+                // Показываем уведомление пользователю
+                const shouldUpdate = confirm(
+                  '🎉 Доступна новая версия приложения!\n\nОбновить сейчас?'
+                )
+
+                if (shouldUpdate) {
+                  // Сообщаем новому SW что нужно взять управление
+                  newWorker.postMessage({ type: 'SKIP_WAITING' })
+                  window.location.reload()
+                }
               }
             })
           }
         })
-      } catch (error) {
-        console.warn('⚠️ Service Worker registration failed:', error)
-      }
+      })
+
+      // Обработка сообщений от Service Worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        console.log('[SW Message]:', event.data)
+
+        if (event.data?.type === 'CACHE_UPDATED') {
+          console.log('📦 Кэш обновлен:', event.data.url)
+        }
+      })
     })
   }
-  
+
+
   // Обработка офлайн/онлайн статуса
   window.addEventListener('online', () => {
     console.log('🌐 Подключение к интернету восстановлено')
   })
-  
+
   window.addEventListener('offline', () => {
     console.log('📱 Работа в офлайн режиме')
   })

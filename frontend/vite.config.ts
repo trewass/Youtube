@@ -6,49 +6,34 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      strategies: 'generateSW',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
-      workbox: {
+      injectRegister: 'auto',
+
+      // Dev mode configuration
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
+
+      // Workbox options
+      injectManifest: {
         globDirectory: 'dist',
         globPatterns: [
-          '**/*.{js,css,html,ico,png,svg,woff2}'
+          '**/*.{js,css,html,ico,png,svg,woff2,webp}'
         ],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\./,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7
-              }
-            }
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30
-              }
-            }
-          },
-          {
-            urlPattern: /\.(?:mp3|wav|m4a|ogg)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'audio-cache',
-              expiration: {
-                maxEntries: 20,
-                maxAgeSeconds: 60 * 60 * 24 * 90
-              }
-            }
-          }
-        ]
+        // Исключаем большие файлы и специфичные директории
+        globIgnores: [
+          '**/node_modules/**/*',
+          '**/sw.js',
+          '**/workbox-*.js'
+        ],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
       },
+
+      // PWA Manifest
       manifest: {
         name: 'AudioBook Library - Библиотека Аудиокниг',
         short_name: 'AudioBooks',
@@ -62,8 +47,44 @@ export default defineConfig({
         categories: ['music', 'books', 'education'],
         icons: [
           {
+            src: '/icons/icon-72x72.png',
+            sizes: '72x72',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/icons/icon-96x96.png',
+            sizes: '96x96',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/icons/icon-128x128.png',
+            sizes: '128x128',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/icons/icon-144x144.png',
+            sizes: '144x144',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/icons/icon-152x152.png',
+            sizes: '152x152',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
             src: '/icons/icon-192x192.png',
             sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
+          {
+            src: '/icons/icon-384x384.png',
+            sizes: '384x384',
             type: 'image/png',
             purpose: 'any maskable'
           },
