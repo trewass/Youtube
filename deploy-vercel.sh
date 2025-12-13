@@ -1,35 +1,48 @@
 #!/bin/bash
 
-echo "🚀 Подготовка к деплою на Vercel..."
-echo ""
+# Vercel Deployment Script
+# Триггерит новый деплой на Vercel
 
-# Проверка что мы в правильной директории
-if [ ! -f "vercel.json" ]; then
-    echo "❌ Ошибка: vercel.json не найден!"
-    echo "Запусти скрипт из корневой директории проекта"
+echo "🚀 Triggering Vercel Deployment..."
+
+# Проверяем что мы в правильной директории
+if [ ! -d "frontend" ]; then
+    echo "❌ Error: frontend directory not found"
+    echo "Please run this script from the project root"
     exit 1
 fi
 
-# Проверка установки Vercel CLI
-if ! command -v vercel &> /dev/null; then
-    echo "📦 Vercel CLI не установлен. Устанавливаем..."
-    npm install -g vercel
+# Проверяем что все изменения закоммичены
+if [[ -n $(git status -s) ]]; then
+    echo "⚠️  Warning: You have uncommitted changes"
+    git status -s
+    read -p "Continue anyway? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
 fi
 
-echo "✅ Все проверки пройдены!"
+# Показываем последние коммиты
 echo ""
+echo "📝 Latest commits:"
+git log --oneline -3
 
-# Деплой
-echo "🌐 Запуск деплоя на Vercel..."
+# Триггерим пустой коммит для форсирования деплоя
 echo ""
+echo "Creating trigger commit..."
+git commit --allow-empty -m "chore: trigger Vercel deployment [$(date '+%Y-%m-%d %H:%M:%S')]"
 
-vercel --prod --yes
+# Пушим в origin/main
+echo ""
+echo "Pushing to GitHub..."
+git push origin main
 
 echo ""
-echo "🎉 Деплой завершен!"
+echo "✅ Deployment triggered!"
 echo ""
-echo "📝 Следующие шаги:"
-echo "   1. Скопируй URL из вывода выше"
-echo "   2. Обнови CORS на бэкенде с этим URL"
-echo "   3. Открой приложение в браузере"
-
+echo "🔗 Check status at: https://vercel.com/dashboard"
+echo "   Your project deployments will update in ~30 seconds"
+echo ""
+echo "⏱️  Build usually takes 2-3 minutes"
+echo "💡 Tip: You can also redeploy from Vercel Dashboard → Deployments → ... → Redeploy"
